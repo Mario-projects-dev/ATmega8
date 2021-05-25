@@ -23,6 +23,6 @@ int main(int argc, char **argv)
 		PORTB&=0b11111101;
 		_delay_ms(500);
 	}
-		return 0;
+		
 }
 
