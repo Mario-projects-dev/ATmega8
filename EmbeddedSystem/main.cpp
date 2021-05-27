@@ -8,6 +8,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#define LED_ON PORTB |= (1<<PORTB5)
+#define LED_ON PORTB &= ~(1<<PORTB5)
+
 int main(int argc, char **argv)
 {
 	//Set PORTB1 as output
