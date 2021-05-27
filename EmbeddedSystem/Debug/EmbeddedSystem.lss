@@ -65,7 +65,7 @@ Disassembly of section .text:
   36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
 
 00000038 <main>:
-#define LED_TOGGLE  PIN |= (1<<PINB5)
+#define LED_TOGGLE PINB |= (1<<PINB5)
 
 int main(int argc, char **argv)
 {

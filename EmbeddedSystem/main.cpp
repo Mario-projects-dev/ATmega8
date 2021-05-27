@@ -10,7 +10,7 @@
 
 #define LED_ON PORTB |= (1<<PORTB5)
 #define LED_OFF PORTB &= ~(1<<PORTB5)
-#define LED_TOGGLE  PIN |= (1<<PINB5)
+#define LED_TOGGLE PINB |= (1<<PINB5)
 
 int main(int argc, char **argv)
 {
