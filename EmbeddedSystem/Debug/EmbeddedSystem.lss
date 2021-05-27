@@ -3,29 +3,29 @@ EmbeddedSystem.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000072  00000000  00000000  00000054  2**1
+  0 .text         0000005c  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000c6  2**0
+  1 .data         00000000  00800060  00800060  000000b0  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000c6  2**0
+  2 .comment      00000030  00000000  00000000  000000b0  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000000f8  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000000e0  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000134  2**0
+  4 .debug_aranges 00000020  00000000  00000000  0000011c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000060c  00000000  00000000  00000154  2**0
+  5 .debug_info   00000541  00000000  00000000  0000013c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000569  00000000  00000000  00000760  2**0
+  6 .debug_abbrev 000004be  00000000  00000000  0000067d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000244  00000000  00000000  00000cc9  2**0
+  7 .debug_line   00000163  00000000  00000000  00000b3b  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00000f10  2**2
+  8 .debug_frame  00000024  00000000  00000000  00000ca0  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000032c  00000000  00000000  00000f34  2**0
+  9 .debug_str    000002e1  00000000  00000000  00000cc4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000006e  00000000  00000000  00001260  2**0
+ 10 .debug_loc    00000026  00000000  00000000  00000fa5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  000012ce  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  00000fcb  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -59,63 +59,48 @@ Disassembly of section .text:
   2e:	de bf       	out	0x3e, r29	; 62
   30:	cd bf       	out	0x3d, r28	; 61
   32:	02 d0       	rcall	.+4      	; 0x38 <main>
-  34:	1c c0       	rjmp	.+56     	; 0x6e <_exit>
+  34:	11 c0       	rjmp	.+34     	; 0x58 <_exit>
 
 00000036 <__bad_interrupt>:
   36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
 
 00000038 <main>:
-#include <util/delay.h>
+#define LED_TOGGLE  PIN |= (1<<PINB5)
 
 int main(int argc, char **argv)
 {
 	//Set PORTB1 as output
-	DDRB=0b00000010;
-  38:	82 e0       	ldi	r24, 0x02	; 2
-  3a:	87 bb       	out	0x17, r24	; 23
+	DDRB |= (1<<DDB5);
+  38:	87 b3       	in	r24, 0x17	; 23
+  3a:	80 62       	ori	r24, 0x20	; 32
+  3c:	87 bb       	out	0x17, r24	; 23
+	DDRB &= ~(1<<DDB5);
+  3e:	87 b3       	in	r24, 0x17	; 23
+  40:	8f 7d       	andi	r24, 0xDF	; 223
+  42:	87 bb       	out	0x17, r24	; 23
 
 	while(1)
 	{
-		//Set PB1=High(+5v), this will turn on the LED
-		PORTB|=0b00000010;
-  3c:	88 b3       	in	r24, 0x18	; 24
-  3e:	82 60       	ori	r24, 0x02	; 2
-  40:	88 bb       	out	0x18, r24	; 24
-	#else
-		//round up by default
-		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
-	#endif
+		if (!(PINB & (1<<PINB7)))
+  44:	b7 99       	sbic	0x16, 7	; 22
+  46:	04 c0       	rjmp	.+8      	; 0x50 <__SREG__+0x11>
+		{
+			LED_ON;
+  48:	88 b3       	in	r24, 0x18	; 24
+  4a:	80 62       	ori	r24, 0x20	; 32
+  4c:	88 bb       	out	0x18, r24	; 24
+  4e:	fa cf       	rjmp	.-12     	; 0x44 <__SREG__+0x5>
+		}
+		else
+		{
+			LED_OFF;
+  50:	88 b3       	in	r24, 0x18	; 24
+  52:	8f 7d       	andi	r24, 0xDF	; 223
+  54:	88 bb       	out	0x18, r24	; 24
+  56:	f6 cf       	rjmp	.-20     	; 0x44 <__SREG__+0x5>
 
-	__builtin_avr_delay_cycles(__ticks_dc);
-  42:	2f e9       	ldi	r18, 0x9F	; 159
-  44:	86 e8       	ldi	r24, 0x86	; 134
-  46:	91 e0       	ldi	r25, 0x01	; 1
-  48:	21 50       	subi	r18, 0x01	; 1
-  4a:	80 40       	sbci	r24, 0x00	; 0
-  4c:	90 40       	sbci	r25, 0x00	; 0
-  4e:	e1 f7       	brne	.-8      	; 0x48 <__SREG__+0x9>
-  50:	00 c0       	rjmp	.+0      	; 0x52 <__SREG__+0x13>
-  52:	00 00       	nop
-		_delay_ms(500); // wait for half second, then turn it off
+00000058 <_exit>:
+  58:	f8 94       	cli
 
-		//Set PB1=Low(GND)
-		PORTB&=0b11111101;
-  54:	88 b3       	in	r24, 0x18	; 24
-  56:	8d 7f       	andi	r24, 0xFD	; 253
-  58:	88 bb       	out	0x18, r24	; 24
-  5a:	2f e9       	ldi	r18, 0x9F	; 159
-  5c:	86 e8       	ldi	r24, 0x86	; 134
-  5e:	91 e0       	ldi	r25, 0x01	; 1
-  60:	21 50       	subi	r18, 0x01	; 1
-  62:	80 40       	sbci	r24, 0x00	; 0
-  64:	90 40       	sbci	r25, 0x00	; 0
-  66:	e1 f7       	brne	.-8      	; 0x60 <__SREG__+0x21>
-  68:	00 c0       	rjmp	.+0      	; 0x6a <__SREG__+0x2b>
-  6a:	00 00       	nop
-  6c:	e7 cf       	rjmp	.-50     	; 0x3c <main+0x4>
-
-0000006e <_exit>:
-  6e:	f8 94       	cli
-
-00000070 <__stop_program>:
-  70:	ff cf       	rjmp	.-2      	; 0x70 <__stop_program>
+0000005a <__stop_program>:
+  5a:	ff cf       	rjmp	.-2      	; 0x5a <__stop_program>
